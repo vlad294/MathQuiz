@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2016
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.Domain", "MathQuiz.Domain\MathQuiz.Domain.csproj", "{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.WebApi", "MathQuiz.WebApi\MathQuiz.WebApi.csproj", "{A47B60E6-DF4A-4AF5-9F63-A46E68CA07A0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.AppLayer", "MathQuiz.AppLayer\MathQuiz.AppLayer.csproj", "{C4908E68-E221-437B-A18D-771039B91923}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.UnitTests", "MathQuiz.UnitTests\MathQuiz.UnitTests.csproj", "{B5BC9C7E-0500-4B24-84C8-7EC992AB0A0E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.DataAccess", "MathQuiz.DataAccess\MathQuiz.DataAccess.csproj", "{C4A0DD75-181E-40F1-98D1-8801CA763149}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathQuiz.EventBus", "MathQuiz.EventBus\MathQuiz.EventBus.csproj", "{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A47B60E6-DF4A-4AF5-9F63-A46E68CA07A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A47B60E6-DF4A-4AF5-9F63-A46E68CA07A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A47B60E6-DF4A-4AF5-9F63-A46E68CA07A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A47B60E6-DF4A-4AF5-9F63-A46E68CA07A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4908E68-E221-437B-A18D-771039B91923}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4908E68-E221-437B-A18D-771039B91923}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4908E68-E221-437B-A18D-771039B91923}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4908E68-E221-437B-A18D-771039B91923}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5BC9C7E-0500-4B24-84C8-7EC992AB0A0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5BC9C7E-0500-4B24-84C8-7EC992AB0A0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5BC9C7E-0500-4B24-84C8-7EC992AB0A0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5BC9C7E-0500-4B24-84C8-7EC992AB0A0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4A0DD75-181E-40F1-98D1-8801CA763149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4A0DD75-181E-40F1-98D1-8801CA763149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4A0DD75-181E-40F1-98D1-8801CA763149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4A0DD75-181E-40F1-98D1-8801CA763149}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CD7F2A78-0624-446D-806A-D9430BB6DA23}
+	EndGlobalSection
+EndGlobal
