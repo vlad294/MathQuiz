@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.Domain", "MathQuiz.Domain\MathQuiz.Domain.csproj", "{C7378BCC-BE7C-46B8-B1B2-660A1EBB292D}"
 EndProject
@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.UnitTests", "MathQ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.DataAccess", "MathQuiz.DataAccess\MathQuiz.DataAccess.csproj", "{C4A0DD75-181E-40F1-98D1-8801CA763149}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathQuiz.EventBus", "MathQuiz.EventBus\MathQuiz.EventBus.csproj", "{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MathQuiz.EventBus", "MathQuiz.EventBus\MathQuiz.EventBus.csproj", "{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MathQuiz.Configuration", "MathQuiz.Configuration\MathQuiz.Configuration.csproj", "{202AD814-E637-481B-9A90-D614273DDD59}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67B3513D-70B9-4064-8FC3-B45F40A7B4AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{202AD814-E637-481B-9A90-D614273DDD59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{202AD814-E637-481B-9A90-D614273DDD59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{202AD814-E637-481B-9A90-D614273DDD59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{202AD814-E637-481B-9A90-D614273DDD59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

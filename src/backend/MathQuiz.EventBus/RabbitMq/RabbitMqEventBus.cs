@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
@@ -137,7 +139,7 @@ namespace MathQuiz.EventBus.RabbitMq
                 routingKey: string.Empty);
 
 
-            _logger.LogInformation("Queue {Queue} bound to exchange {Exchange} for event {EventType}.", 
+            _logger.LogInformation("Queue {Queue} bound to exchange {Exchange} for event {EventType}.",
                 queueName, exchangeName, typeof(TEvent).Name);
 
             var consumer = new AsyncEventingBasicConsumer(channel);
@@ -166,7 +168,11 @@ namespace MathQuiz.EventBus.RabbitMq
                 foreach (var handlerType in handlerTypes)
                 {
                     var handler = scope.ServiceProvider.GetRequiredService(handlerType);
-                    if (handler == null) continue;
+                    if (handler == null)
+                    {
+                        _logger.LogError("HandlerType {Type} is not registered in DI container", handlerType.Name);
+                        continue;
+                    };
                     var integrationEvent = JsonConvert.DeserializeObject(message, typeof(TEvent));
                     var concreteType = typeof(IIntegrationEventHandler<>).MakeGenericType(typeof(TEvent));
                     await (Task)concreteType.GetMethod(nameof(IIntegrationEventHandler<object>.Handle))
@@ -192,8 +198,8 @@ namespace MathQuiz.EventBus.RabbitMq
 
             var queueName = eventAttribute.QueueName ?? typeof(TEvent).Name;
 
-            return eventAttribute.AddMachineName 
-                ? $"{queueName}_{Environment.MachineName}" 
+            return eventAttribute.AddMachineName
+                ? $"{queueName}_{Environment.MachineName}"
                 : queueName;
         }
     }
