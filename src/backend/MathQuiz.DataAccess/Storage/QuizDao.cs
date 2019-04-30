@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using MathQuiz.Configuration;
-using MathQuiz.DataAccess.Abstractions;
 using MathQuiz.Domain;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -13,28 +12,24 @@ namespace MathQuiz.DataAccess.Storage
         private const string CollectionName = "Games";
         private readonly IOptions<QuizSettings> _quizSettingsOptions;
 
-        public QuizDao(IMongoDatabase mongoDatabase, 
+        public QuizDao(IMongoDatabase mongoDatabase,
             IOptions<QuizSettings> quizSettingsOptions)
         {
             _quizSettingsOptions = quizSettingsOptions;
             _collection = mongoDatabase.GetCollection<Quiz>(CollectionName);
         }
 
-        public Task<Quiz> GetOrCreateQuizForUser(string username)
+        public Task<Quiz> AddUserToQuizOrCreateNew(string username)
         {
             var usersCountLimit = _quizSettingsOptions.Value.UsersLimit;
             return _collection.FindOneAndUpdateAsync(
-                Builders<Quiz>.Filter.Or(
-                    Builders<Quiz>.Filter
-                        .ElemMatch(x => x.Users, x => x.Login == username),
-                    Builders<Quiz>.Filter.Not(
-                        Builders<Quiz>.Filter.Exists(x => x.Users[usersCountLimit - 1])
-                    )
+                Builders<Quiz>.Filter.Not(
+                    Builders<Quiz>.Filter.Exists(x => x.Users[usersCountLimit - 1])
                 ),
                 Builders<Quiz>.Update
                     .AddToSet(x => x.Users, new User
                     {
-                        Login = username,
+                        Username = username,
                         Score = 0
                     }),
                 new FindOneAndUpdateOptions<Quiz>
@@ -45,18 +40,18 @@ namespace MathQuiz.DataAccess.Storage
             );
         }
 
-        public Task<string> GetUserQuizId(string username)
+        public Task<Quiz> GetUserQuiz(string username)
         {
             return _collection.Find(
-                Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Login == username)
-            ).Project(x => x.Id).SingleOrDefaultAsync();
+                Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Username == username)
+            ).SingleOrDefaultAsync();
         }
 
         public Task<Quiz> RemoveUserFromQuiz(string username)
         {
             return _collection.FindOneAndUpdateAsync(
-                Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Login == username),
-                Builders<Quiz>.Update.PullFilter(x => x.Users, u => u.Login == username)
+                Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Username == username),
+                Builders<Quiz>.Update.PullFilter(x => x.Users, u => u.Username == username)
             );
         }
 
@@ -72,38 +67,36 @@ namespace MathQuiz.DataAccess.Storage
                 }));
         }
 
-        public Task<Quiz> ChallengeUserValidAnswerAndIncreaseScore(string quizId, string username, bool isCorrect)
+        public Task<Quiz> CompleteQuizAndIncreaseUserScore(string quizId, string username)
         {
             return _collection.FindOneAndUpdateAsync(
                 Builders<Quiz>.Filter.And(
                     Builders<Quiz>.Filter.Eq(x => x.Id, quizId),
                     Builders<Quiz>.Filter.Eq(x => x.Challenge.IsCompleted, false),
-                    Builders<Quiz>.Filter.Eq(x => x.Challenge.IsCorrect, isCorrect),
-                    Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Login == username)
+                    Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Username == username)
                 ),
                 Builders<Quiz>.Update
                     .Inc(x => x.Users[-1].Score, 1)
                     .Set(x => x.Challenge.IsCompleted, true),
                 new FindOneAndUpdateOptions<Quiz>
                 {
-                    ReturnDocument = ReturnDocument.Before
+                    ReturnDocument = ReturnDocument.After
                 }
             );
         }
 
-        public Task<Quiz> ChallengeUserInvalidAnswerAndDecreaseScore(string quizId, string username, bool isCorrect)
+        public Task<Quiz> DecreaseUserScore(string quizId, string username)
         {
             return _collection.FindOneAndUpdateAsync(
                 Builders<Quiz>.Filter.And(
                     Builders<Quiz>.Filter.Eq(x => x.Id, quizId),
                     Builders<Quiz>.Filter.Eq(x => x.Challenge.IsCompleted, false),
-                    Builders<Quiz>.Filter.Eq(x => x.Challenge.IsCorrect, !isCorrect),
-                    Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Login == username)
+                    Builders<Quiz>.Filter.ElemMatch(x => x.Users, x => x.Username == username)
                 ),
                 Builders<Quiz>.Update.Inc(x => x.Users[-1].Score, -1),
                 new FindOneAndUpdateOptions<Quiz>
                 {
-                    ReturnDocument = ReturnDocument.Before
+                    ReturnDocument = ReturnDocument.After
                 }
             );
         }

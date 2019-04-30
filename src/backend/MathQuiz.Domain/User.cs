@@ -5,7 +5,7 @@ namespace MathQuiz.Domain
     public class User
     {
         [BsonId]
-        public string Login { get; set; }
+        public string Username { get; set; }
 
         public int Score { get; set; }
     }

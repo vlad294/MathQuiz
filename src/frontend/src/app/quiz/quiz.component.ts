@@ -36,8 +36,14 @@ export class QuizComponent implements OnInit {
 
   exit(): void {
     this.quizService.exit().subscribe(() => {
-      this.authService.logout();
+      this.authService.signout();
     });
+  }
+
+  sendAnswer(answer: boolean): void {
+    const connection = this.quizHubService.connection;
+
+    connection.send('SendAnswer', answer);
   }
 
   private subscribe() {

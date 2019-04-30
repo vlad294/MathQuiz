@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using MathQuiz.AppLayer.Abstractions;
+using MathQuiz.AppLayer.Services;
 using MathQuiz.AppLayer.Services.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

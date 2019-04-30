@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using MathQuiz.AppLayer.Abstractions;
+using MathQuiz.AppLayer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -20,14 +20,25 @@ namespace MathQuiz.WebApi.SignalR
 
         public override async Task OnConnectedAsync()
         {
-            var quizId = await _quizService.GetUserQuizId(Username);
-            await Groups.AddToGroupAsync(Context.ConnectionId, quizId);
             await base.OnConnectedAsync();
+
+            var (quizId, quiz) = await _quizService.GetUserQuizWithId(Username);
+            await Groups.AddToGroupAsync(Context.ConnectionId, quizId);
+            await SendQuestionToConnectedUser(quiz.Challenge.Question);
         }
 
-        public Task SendAnswer(bool isCorrect)
+        public Task SendAnswer(bool answer)
         {
-            return _quizService.HandleUserAnswer(Username, isCorrect);
+            return _quizService.HandleUserAnswer(Username, answer);
+        }
+
+        private async Task SendQuestionToConnectedUser(string question)
+        {
+            if (!string.IsNullOrEmpty(question))
+            {
+                await Clients.Client(Context.ConnectionId)
+                    .ChallengeUpdated(question);
+            }
         }
     }
 }

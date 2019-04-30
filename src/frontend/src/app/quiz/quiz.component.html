@@ -13,11 +13,11 @@
       <mat-list>
         <mat-list-item *ngFor="let item of users$ | async">
           <h3 matLine title="Name">
-            {{item.login}}
+            {{item.username}}
           </h3>
           <mat-chip-list>
             <mat-chip title="Score" class="mat-chip mat-primary mat-chip-selected" color="primary" selected="true"
-              [ngClass]="{'mat-primary mat-chip-selected': (authenticatedUser$ | async)?.username == item.login}">
+              [ngClass]="{'mat-primary mat-chip-selected': (authenticatedUser$ | async)?.username == item.username}">
               {{item.score}}
             </mat-chip>
           </mat-chip-list>
@@ -29,8 +29,8 @@
       <mat-card class="app-card-content">
         <mat-card-title>{{(challenge$ | async)?.question}}</mat-card-title>
         <mat-card-actions>
-          <button mat-raised-button color="primary" style="submit">True</button>
-          <button mat-button type="button">False</button>
+          <button (click)="sendAnswer(true)" mat-raised-button color="primary" style="submit">True</button>
+          <button (click)="sendAnswer(false)" mat-button type="button">False</button>
         </mat-card-actions>
       </mat-card>
     </ng-container>

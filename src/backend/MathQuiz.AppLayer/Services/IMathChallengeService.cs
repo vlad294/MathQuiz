@@ -1,6 +1,6 @@
 ﻿using MathQuiz.Domain;
 
-namespace MathQuiz.AppLayer.Abstractions
+namespace MathQuiz.AppLayer.Services
 {
     public interface IMathChallengeService
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MathQuiz.AppLayer.Abstractions;
 using MathQuiz.AppLayer.Messages;
+using MathQuiz.AppLayer.Services;
 using MathQuiz.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 

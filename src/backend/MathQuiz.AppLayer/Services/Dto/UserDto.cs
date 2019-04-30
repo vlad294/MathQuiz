@@ -2,7 +2,7 @@
 {
     public class UserDto
     {
-        public string Login { get; set; }
+        public string Username { get; set; }
 
         public int Score { get; set; }
     }

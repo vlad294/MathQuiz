@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using MathQuiz.AppLayer.Abstractions;
 using MathQuiz.AppLayer.Messages;
 using MathQuiz.AppLayer.Services.Dto;
 using MathQuiz.Configuration;
-using MathQuiz.DataAccess.Abstractions;
+using MathQuiz.DataAccess.Storage;
+using MathQuiz.Domain;
 using MathQuiz.EventBus.Abstractions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,10 +21,10 @@ namespace MathQuiz.AppLayer.Services
         private readonly IOptions<QuizSettings> _quizSettingsOptions;
         private readonly ILogger<QuizService> _logger;
 
-        public QuizService(IQuizDao quizDao, 
+        public QuizService(IQuizDao quizDao,
             IEventBus eventBus,
             IMapper mapper,
-            IOptions<QuizSettings> quizSettingsOptions, 
+            IOptions<QuizSettings> quizSettingsOptions,
             ILogger<QuizService> logger)
         {
             _quizDao = quizDao;
@@ -34,51 +34,11 @@ namespace MathQuiz.AppLayer.Services
             _mapper = mapper;
         }
 
-        public async Task HandleUserAnswer(string username, bool answer)
+        public async Task<(string, QuizDto)> GetUserQuizWithId(string username)
         {
-            var quizId = await _quizDao.GetUserQuizId(username);
+            var quiz = await _quizDao.GetUserQuiz(username);
 
-            var validAnswerUpdateTask = _quizDao.ChallengeUserValidAnswerAndIncreaseScore(quizId, username, answer);
-            var invalidAnswerUpdateTask = _quizDao.ChallengeUserInvalidAnswerAndDecreaseScore(quizId, username, answer);
-
-            var validAnswerUpdate = await validAnswerUpdateTask;
-            var invalidAnswerUpdate = await invalidAnswerUpdateTask;
-            var quiz = validAnswerUpdate ?? invalidAnswerUpdate;
-
-            if (validAnswerUpdate != null)
-            {
-                _logger.LogInformation("User {User} gave correct answer {Answer} for question {Question}", 
-                    username, answer, validAnswerUpdate.Challenge.Question);
-
-                var delayBetweenGames = _quizSettingsOptions.Value.DelayBetweenGamesInSeconds;
-                _eventBus.Publish(new ChallengeStarting
-                {
-                    QuizId = quizId,
-                    StartDate = DateTimeOffset.UtcNow.AddSeconds(delayBetweenGames)
-                });
-            }
-
-            if (invalidAnswerUpdate != null)
-            {
-                _logger.LogInformation("User {User} gave incorrect answer {Answer} for question {Question}",
-                    username, answer, validAnswerUpdate?.Challenge?.Question);
-            }
-
-            var currentUser = quiz?.Users.FirstOrDefault(x => x.Login == username);
-            if (currentUser != null)
-            {
-                _eventBus.Publish(new UserScoreUpdated
-                {
-                    Username = username,
-                    Score = currentUser.Score,
-                    QuizId = quizId
-                });
-            }
-        }
-
-        public Task<string> GetUserQuizId(string username)
-        {
-            return _quizDao.GetUserQuizId(username);
+            return (quiz.Id, _mapper.Map<QuizDto>(quiz));
         }
 
         public async Task SetChallengeToQuiz(string quizId, string question, bool isCorrect)
@@ -88,15 +48,16 @@ namespace MathQuiz.AppLayer.Services
 
         public async Task<QuizDto> StartQuiz(string username)
         {
-            var quiz = await _quizDao.GetOrCreateQuizForUser(username);
+            var quiz = await _quizDao.GetUserQuiz(username)
+                    ?? await _quizDao.AddUserToQuizOrCreateNew(username);
 
-            _logger.LogInformation("User {User} entered to quiz {QuizId}",
+            _logger.LogInformation("User {User} joined to quiz {QuizId}",
                 username, quiz.Id);
 
             if (quiz.Challenge == null)
             {
-                _logger.LogInformation("New quiz {QuizId} created, publishing ChallengeStarting event",
-                    quiz.Id);
+                _logger.LogInformation("New quiz {QuizId} created, publishing ChallengeStarting event", quiz.Id);
+
                 _eventBus.Publish(new ChallengeStarting
                 {
                     QuizId = quiz.Id,
@@ -125,6 +86,69 @@ namespace MathQuiz.AppLayer.Services
                 QuizId = quiz.Id,
                 Username = username
             });
+        }
+
+        public async Task HandleUserAnswer(string username, bool answer)
+        {
+            var quiz = await _quizDao.GetUserQuiz(username);
+
+            if (quiz.Challenge == null)
+                return;
+
+            if (quiz.Challenge.IsCorrect == answer)
+            {
+                await HandleCorrectAnswer(username, answer, quiz);
+            }
+            else
+            {
+                await HandleIncorrectAnswer(username, answer, quiz);
+            }
+        }
+
+        private async Task HandleCorrectAnswer(string username, bool answer, Quiz quiz)
+        {
+            _logger.LogInformation("User {User} gave correct answer {Answer} for question {Question}",
+                username, answer, quiz.Challenge.Question);
+
+            var updatedQuiz = await _quizDao.CompleteQuizAndIncreaseUserScore(quiz.Id, username);
+
+            if (updatedQuiz != null)
+            {
+                PublishUserScoreUpdated(updatedQuiz, username);
+
+                var delayBetweenGames = _quizSettingsOptions.Value.DelayBetweenGamesInSeconds;
+                _eventBus.Publish(new ChallengeStarting
+                {
+                    QuizId = quiz.Id,
+                    StartDate = DateTimeOffset.UtcNow.AddSeconds(delayBetweenGames)
+                });
+            }
+        }
+
+        private async Task HandleIncorrectAnswer(string username, bool answer, Quiz quiz)
+        {
+            _logger.LogInformation("User {User} gave incorrect answer {Answer} for question {Question}",
+                username, answer, quiz.Challenge.Question);
+            var updatedQuiz = await _quizDao.DecreaseUserScore(quiz.Id, username);
+
+            if (updatedQuiz != null)
+            {
+                PublishUserScoreUpdated(updatedQuiz, username);
+            }
+        }
+
+        private void PublishUserScoreUpdated(Quiz quiz, string username)
+        {
+            var updatedUserScore = quiz.Users.FirstOrDefault(x => x.Username == username)?.Score;
+            if (updatedUserScore != null)
+            {
+                _eventBus.Publish(new UserScoreUpdated
+                {
+                    Username = username,
+                    Score = updatedUserScore.Value,
+                    QuizId = quiz.Id
+                });
+            }
         }
     }
 }

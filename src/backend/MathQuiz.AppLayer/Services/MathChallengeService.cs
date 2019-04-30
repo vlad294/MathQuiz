@@ -1,5 +1,4 @@
 ﻿using System;
-using MathQuiz.AppLayer.Abstractions;
 using MathQuiz.Domain;
 
 namespace MathQuiz.AppLayer.Services

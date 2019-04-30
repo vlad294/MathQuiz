@@ -1,14 +1,13 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MathQuiz.AppLayer.Services.Dto;
 
-namespace MathQuiz.AppLayer.Abstractions
+namespace MathQuiz.AppLayer.Services
 {
     public interface IQuizService
     {
         Task HandleUserAnswer(string username, bool answer);
 
-        Task<string> GetUserQuizId(string username);
+        Task<(string, QuizDto)> GetUserQuizWithId(string username);
 
         Task<QuizDto> StartQuiz(string username);
 

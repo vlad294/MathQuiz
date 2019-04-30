@@ -14,7 +14,7 @@ export class AuthService {
         this.currentUser$ = new BehaviorSubject<AuthenticatedUser>(localStorageData);
     }
 
-    login(username: string): Observable<void> {
+    signin(username: string): Observable<void> {
         const params = new HttpParams()
             .set("username", username);
 
@@ -29,7 +29,7 @@ export class AuthService {
             }));
     }
 
-    logout() {
+    signout() {
         // remove user from local storage to log user out
         localStorage.removeItem('currentUser');
         this.currentUser$.next(null);

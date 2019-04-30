@@ -18,7 +18,7 @@ export class LoginComponent {
     if (this.form.valid) {
       const username = this.form.controls['username'].value;
 
-      this.authService.login(username).subscribe();
+      this.authService.signin(username).subscribe();
     }
   }
 }
