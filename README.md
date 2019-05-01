@@ -28,11 +28,21 @@ dotnet test
 
 ## Scheme of work
 
-TODO
+### Broadcast event bus messages
 
-## Deployment
+* `UserConnected`
+* `UserDisconnected`
+* `ChallengeFinished`
+* `ChallengeUpdated`
+* `UserScoreUpdated`
 
-TODO
+Broadcast messages are used as SignalR backplane, to notify users on all application nodes.
+
+### Round-robin event bus messages
+* `ChallengeStarting`
+
+ Round-robin message `ChallengeStarting` performs load balancing between all application nodes for generating and starting new math challenges.
+
 
 ## Built With
 
