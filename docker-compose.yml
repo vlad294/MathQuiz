@@ -1,0 +1,61 @@
+version: "3"
+services:
+
+  backend-node1:
+    build:
+      dockerfile: src/backend/Dockerfile
+      context: .
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=DevDocker
+    depends_on:
+      - mongo
+      - rabbitmq
+    container_name: mathquiz-backend-node1
+
+  backend-node2:
+    build:
+      dockerfile: src/backend/Dockerfile
+      context: .
+    environment: 
+      - ASPNETCORE_ENVIRONMENT=DevDocker
+    depends_on:
+      - mongo
+      - rabbitmq
+    container_name: mathquiz-backend-node2
+
+  frontend:
+    build:
+      dockerfile: src/frontend/Dockerfile
+      context: .
+    container_name: mathquiz-frontend
+
+  nginx: 
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - backend-node1
+      - backend-node2
+      - frontend
+    container_name: mathquiz-nginx
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
+    container_name: mathquiz-rabbitmq
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    expose:
+      - "27017"
+    container_name: mathquiz-mongo

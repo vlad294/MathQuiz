@@ -8,7 +8,7 @@
       <mat-icon class="exit-icon" aria-hidden="false" aria-label="delete icon">input</mat-icon>
     </button>
   </mat-toolbar>
-  <mat-sidenav-container class="sidenav-container" style="flex: 1;">
+  <mat-sidenav-container class="sidenav-container">
     <mat-sidenav #sidenav mode="side" opened class="sidenav">
       <mat-list>
         <mat-list-item *ngFor="let item of users$ | async">
@@ -24,13 +24,13 @@
         </mat-list-item>
       </mat-list>
     </mat-sidenav>
-    <ng-container *ngIf="!(challenge$ | async)?.isCompleted">
+    <ng-container>
       <mat-toolbar>Current challenge</mat-toolbar>
       <mat-card class="app-card-content">
         <mat-card-title>{{(challenge$ | async)?.question}}</mat-card-title>
         <mat-card-actions>
-          <button (click)="sendAnswer(true)" mat-raised-button color="primary" style="submit">True</button>
-          <button (click)="sendAnswer(false)" mat-button type="button">False</button>
+          <button (click)="sendAnswer(true)" [disabled]="!canSendAnswer()" mat-raised-button color="primary" style="submit">True</button>
+          <button (click)="sendAnswer(false)" [disabled]="!canSendAnswer()" mat-button type="button">False</button>
         </mat-card-actions>
       </mat-card>
     </ng-container>

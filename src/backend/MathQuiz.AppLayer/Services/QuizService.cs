@@ -78,14 +78,17 @@ namespace MathQuiz.AppLayer.Services
         {
             var quiz = await _quizDao.RemoveUserFromQuiz(username);
 
-            _logger.LogInformation("User {User} exited from quiz {QuizId}",
-                username, quiz.Id);
-
-            _eventBus.Publish(new UserDisconnected
+            if (quiz != null)
             {
-                QuizId = quiz.Id,
-                Username = username
-            });
+                _logger.LogInformation("User {User} exited from quiz {QuizId}",
+                    username, quiz.Id);
+
+                _eventBus.Publish(new UserDisconnected
+                {
+                    QuizId = quiz.Id,
+                    Username = username
+                });
+            }
         }
 
         public async Task HandleUserAnswer(string username, bool answer)
@@ -107,14 +110,19 @@ namespace MathQuiz.AppLayer.Services
 
         private async Task HandleCorrectAnswer(string username, bool answer, Quiz quiz)
         {
-            _logger.LogInformation("User {User} gave correct answer {Answer} for question {Question}",
-                username, answer, quiz.Challenge.Question);
-
             var updatedQuiz = await _quizDao.CompleteQuizAndIncreaseUserScore(quiz.Id, username);
 
             if (updatedQuiz != null)
             {
+                _logger.LogInformation("User {User} gave correct answer {Answer} for question {Question}",
+                    username, answer, quiz.Challenge.Question);
+
                 PublishUserScoreUpdated(updatedQuiz, username);
+
+                _eventBus.Publish(new ChallengeFinished
+                {
+                    QuizId = quiz.Id
+                });
 
                 var delayBetweenGames = _quizSettingsOptions.Value.DelayBetweenGamesInSeconds;
                 _eventBus.Publish(new ChallengeStarting
@@ -127,12 +135,13 @@ namespace MathQuiz.AppLayer.Services
 
         private async Task HandleIncorrectAnswer(string username, bool answer, Quiz quiz)
         {
-            _logger.LogInformation("User {User} gave incorrect answer {Answer} for question {Question}",
-                username, answer, quiz.Challenge.Question);
             var updatedQuiz = await _quizDao.DecreaseUserScore(quiz.Id, username);
 
             if (updatedQuiz != null)
             {
+                _logger.LogInformation("User {User} gave incorrect answer {Answer} for question {Question}",
+                    username, answer, quiz.Challenge.Question);
+
                 PublishUserScoreUpdated(updatedQuiz, username);
             }
         }

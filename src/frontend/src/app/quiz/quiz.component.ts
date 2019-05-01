@@ -5,6 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 import { MathChallenge, User, HistoryEntry } from './quiz.model';
 import { AuthenticatedUser } from '../shared/auth/auth.model';
 import { QuizHubService } from './quiz-hub.service';
+import { QuizHubEvent } from './quiz-hub.model';
 
 @Component({
   selector: 'app-quiz',
@@ -13,8 +14,8 @@ import { QuizHubService } from './quiz-hub.service';
 })
 export class QuizComponent implements OnInit {
   readonly challenge$: BehaviorSubject<MathChallenge> = new BehaviorSubject<MathChallenge>(null);
-  readonly users$: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
   readonly history$: BehaviorSubject<HistoryEntry[]> = new BehaviorSubject<HistoryEntry[]>([]);
+  readonly users$: BehaviorSubject<User[]> = new BehaviorSubject<User[]>([]);
   readonly authenticatedUser$: BehaviorSubject<AuthenticatedUser>;
 
   constructor(
@@ -28,8 +29,14 @@ export class QuizComponent implements OnInit {
     this.quizService.start().subscribe(quiz => {
       this.challenge$.next(quiz.challenge);
       this.users$.next(quiz.users);
+
       this.quizHubService.connect().then(() => {
-        this.subscribe();
+        this.quizHubService
+          .on(QuizHubEvent.UserConnected, this.onUserConnected.bind(this))
+          .on(QuizHubEvent.UserDisconnected, this.onUserDisconnected.bind(this))
+          .on(QuizHubEvent.ChallengeUpdated, this.onChallengeUpdated.bind(this))
+          .on(QuizHubEvent.ChallengeFinished, this.onChallengeFinished.bind(this))
+          .on(QuizHubEvent.UserScoreUpdated, this.onUserScoreUpdated.bind(this));
       });
     });
   }
@@ -40,51 +47,94 @@ export class QuizComponent implements OnInit {
     });
   }
 
+  canSendAnswer(): boolean {
+    return this.challenge$.value
+      && !this.challenge$.value.isCompleted;
+  }
+
   sendAnswer(answer: boolean): void {
     const connection = this.quizHubService.connection;
 
     connection.send('SendAnswer', answer);
   }
 
-  private subscribe() {
-    const connection = this.quizHubService.connection;
-    connection.on("ChallengeUpdated", (question: string) => {
-      this.challenge$.next({
-        question: question,
-        isCompleted: false
-      } as MathChallenge);
-    });
+  private onChallengeUpdated(question: string) {
+    const history = this.history$.value;
+    const challenge = this.challenge$.value;
 
-    connection.on("UserScoreUpdated", (username, score) => {
-      let users = this.users$.value;
-      const userIndex = users.findIndex(x => x.username == username)
+    if (challenge && challenge.question === question) {
+      return;
+    }
 
-      if (userIndex !== -1) {
-        users[userIndex].score = score;
-        this.users$.next(users);
-      }
-    });
+    this.challenge$.next({
+      question: question,
+      isCompleted: false
+    } as MathChallenge);
 
-    connection.on("UserConnected", (username: string) => {
-      const users = this.users$.value;
+    history.unshift({
+      timestamp: new Date(),
+      message: `New challenge '${question}' started`
+    } as HistoryEntry);
+    this.history$.next(history);
+  }
 
-      if (users.findIndex(x => x.username == username) === -1) {
-        users.push({
-          username: username,
-          score: 0
-        } as User);
-        this.users$.next(users);
-      }
-    });
+  private onChallengeFinished() {
+    const challenge = this.challenge$.value;
 
-    connection.on("UserDisconnected", (username: string) => {
-      let users = this.users$.value;
-      const userIndex = users.findIndex(x => x.username == username)
+    challenge.isCompleted = true;
+    this.challenge$.next(challenge);
+  }
 
-      if (userIndex !== -1) {
-        users = users.splice(userIndex, 1);
-        this.users$.next(users);
-      }
-    });
+  private onUserScoreUpdated(username: string, score: number) {
+    let users = this.users$.value;
+    const history = this.history$.value;
+    const userIndex = users.findIndex(x => x.username == username)
+
+    if (userIndex !== -1) {
+      users[userIndex].score = score;
+      this.users$.next(users);
+
+      history.unshift({
+        timestamp: new Date(),
+        message: `${username} score updated to ${score}`
+      } as HistoryEntry);
+      this.history$.next(history);
+    }
+  }
+
+  private onUserConnected(username: string) {
+    const users = this.users$.value;
+    const history = this.history$.value;
+
+    if (users.findIndex(x => x.username == username) === -1) {
+      users.push({
+        username: username,
+        score: 0
+      } as User);
+      this.users$.next(users);
+
+      history.unshift({
+        timestamp: new Date(),
+        message: `User ${username} connected`
+      } as HistoryEntry);
+      this.history$.next(history);
+    }
+  }
+
+  private onUserDisconnected(username: string) {
+    let users = this.users$.value;
+    const history = this.history$.value;
+    const userIndex = users.findIndex(x => x.username == username)
+
+    if (userIndex !== -1) {
+      users = users.splice(userIndex, 1);
+      this.users$.next(users);
+
+      history.unshift({
+        timestamp: new Date(),
+        message: `User ${username} disconnected`
+      } as HistoryEntry);
+      this.history$.next(history);
+    }
   }
 }

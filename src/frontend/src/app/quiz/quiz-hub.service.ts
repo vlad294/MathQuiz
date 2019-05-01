@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HubConnectionBuilder, HubConnection, HttpTransportType, LogLevel } from '@aspnet/signalr';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../shared/auth/auth.service';
+import { QuizHubEvent } from './quiz-hub.model';
 
 @Injectable()
 export class QuizHubService {
@@ -20,10 +21,18 @@ export class QuizHubService {
             })
             .build();
 
-        await connection.start()      
+        await connection.start()
             .then(() => console.log('Connection started'))
             .catch(err => console.log('Error while starting connection: ' + err))
 
         this.connection = connection;
+
+        this.connection.on
+    }
+
+    on(eventName: QuizHubEvent, action: (...args: any[]) => void): QuizHubService {
+        this.connection.on(eventName, action);
+
+        return this;
     }
 }

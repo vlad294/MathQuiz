@@ -206,6 +206,7 @@ namespace MathQuiz.WebApi
             services.AddSingleton<IEventBus, RabbitMqEventBus>();
             services.AddScoped<ChallengeUpdatedEventHandler>();
             services.AddScoped<ChallengeStartingEventHandler>();
+            services.AddScoped<ChallengeFinishedEventHandler>();
             services.AddScoped<UserConnectedEventHandler>();
             services.AddScoped<UserDisconnectedEventHandler>();
             services.AddScoped<UserScoreUpdatedEventHandler>();
@@ -217,6 +218,7 @@ namespace MathQuiz.WebApi
 
             eventBus.Subscribe<ChallengeStarting, ChallengeStartingEventHandler>();
             eventBus.Subscribe<ChallengeUpdated, ChallengeUpdatedEventHandler>();
+            eventBus.Subscribe<ChallengeFinished, ChallengeFinishedEventHandler>();
             eventBus.Subscribe<UserConnected, UserConnectedEventHandler>();
             eventBus.Subscribe<UserDisconnected, UserDisconnectedEventHandler>();
             eventBus.Subscribe<UserScoreUpdated, UserScoreUpdatedEventHandler>();
